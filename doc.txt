@@ -1,0 +1,53 @@
+Criando o diretorio do projeto
+
+mkdir fastapi_server
+cd fastapi_server
+
+criando um ambiente virtual
+
+python -m venv .venv
+
+ativando o ambiente viartual
+
+.venv\Scripts\activate
+
+desativando o ambiente virtual e voltando para o modo global do python
+
+deactivate
+
+Instalando fastapi e websockets
+
+pip install fastapi uvicorn
+
+pip install websockets
+
+
+executando o servidor
+
+uvicorn main:app --reload
+
+
+gerando o arquivo requeriments.txt
+
+pip freeze > requirements.txt
+
+** copiar este arquivo para o servidor, e executar pip install -r requirements.txt
+
+rodando no servidor de produção: uvicorn main:app --host 0.0.0.0 --port 8000
+
+
+* base do exemplo main.py
+******
+https://medium.com/@nmjoshi/getting-started-websocket-with-fastapi-b41d244a2799
+
+* base do exemplo main2.py
+https://fastapi.tiangolo.com/advanced/websockets/
+******
+
+
+---
+instalação do firebird-driver
+https://firebird-driver.readthedocs.io/en/latest/
+
+pip install firebird-driver
+---
