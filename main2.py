@@ -110,6 +110,8 @@ async def get_lista_vez():
 
 @app.post("/lancar_prevenda")
 async def lancar_prevenda(prevenda: Prevenda):
+    print('**lancar prevenda**')
+    print(prevenda)
     db.lancar_prevenda(prevenda)
 
     retorno_web_socket.set_lista_vez( db.get_lista_vez() )
