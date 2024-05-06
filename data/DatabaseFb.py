@@ -8,7 +8,8 @@ select gen_id(%s, 1) as NEW_GEN from RDB$DATABASE
 """
 
 STM_SELECT_LISTA_VEZ = """
-select ID_LV, ORDEM_LV, COD_ATENDENTE_LV, ID_STATUS_LV, RE.NOME_RE, coalesce(LM.DESC_LM, '') as DESC_MOTIVO
+select ID_LV, ORDEM_LV, COD_ATENDENTE_LV, ID_STATUS_LV, RE.NOME_RE, coalesce(LM.DESC_LM, '') as DESC_MOTIVO,
+       (select max(HORA_LL) from LISTA_VEZ_LOG_STATUS where ID_LISTA_VEZ_LL = LV.ID_LV) as HORA
     from LISTA_VEZ LV
     left join REPRESENTANTE RE on RE.COD_RE = LV.COD_ATENDENTE_LV
     left join LISTA_VEZ_MOTIVO LM on LM.ID_LM = LV.ID_MOTIVO_LV
@@ -158,7 +159,7 @@ class DatabaseFb():
         cur = self.con.cursor()
         cur.execute(STM_SELECT_LISTA_VEZ % (data_atual.strftime("%Y-%m-%d") ) )
 
-        for (id_lista_vez, ordem, cod_atendente, id_status, nome_atendente, desc_motivo) in cur:
+        for (id_lista_vez, ordem, cod_atendente, id_status, nome_atendente, desc_motivo, hora) in cur:
             if (id_status == self.ID_STATUS_ATIVO):
                 key = self.TAG_DISPONIVEIS
             elif (id_status == self.ID_STATUS_EM_ATENDIMENTO):
@@ -174,7 +175,8 @@ class DatabaseFb():
                                         nome_atendente = nome_atendente.title()[0:20],
                                         ordem = ordem,
                                         id_status = id_status,
-                                        desc_motivo = desc_motivo.title() ) )
+                                        desc_motivo = desc_motivo.title(),
+                                        hora = hora.strftime("%H:%M:%S") ) )
 
         cur.close()
 
