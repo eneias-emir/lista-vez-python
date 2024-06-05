@@ -8,7 +8,7 @@ select gen_id(%s, 1) as NEW_GEN from RDB$DATABASE
 """
 
 STM_SELECT_LISTA_VEZ = """
-select ID_LV, ORDEM_LV, COD_ATENDENTE_LV, ID_STATUS_LV, RE.NOME_RE, coalesce(LM.DESC_LM, '') as DESC_MOTIVO,
+select ID_LV, ORDEM_LV, COD_ATENDENTE_LV, ID_STATUS_LV, RE.NOME_RE, RE.TIPO_RE, coalesce(LM.DESC_LM, '') as DESC_MOTIVO,
        (select max(HORA_LL) from LISTA_VEZ_LOG_STATUS where ID_LISTA_VEZ_LL = LV.ID_LV) as HORA
     from LISTA_VEZ LV
     left join REPRESENTANTE RE on RE.COD_RE = LV.COD_ATENDENTE_LV
@@ -51,9 +51,9 @@ select COD_RE,
        NOME_RE 
   from REPRESENTANTE 
   where ATIVO_RE = '{ativo}' 
-  and TIPO_RE = '{tipo}'
   order by NOME_RE
 """
+#  and TIPO_RE = '{tipo}'
 
 # classe usada para receber os parametros POST do metodo de atualizar prevenda
 class Prevenda(BaseModel):
@@ -121,7 +121,8 @@ class DatabaseFb():
         result = []
 
         cur = self.con.cursor()
-        cur.execute(STM_SELECT_ATENDENTE_ATIVO.format(ativo='S', tipo='001'))
+        # cur.execute(STM_SELECT_ATENDENTE_ATIVO.format(ativo='S', tipo='001'))
+        cur.execute(STM_SELECT_ATENDENTE_ATIVO.format(ativo='S'))
 
         for (COD_RE, NOME_RE) in cur:
             result.append(dict(cod_atendente = COD_RE, nome_atendente = NOME_RE.title()))
@@ -159,7 +160,7 @@ class DatabaseFb():
         cur = self.con.cursor()
         cur.execute(STM_SELECT_LISTA_VEZ % (data_atual.strftime("%Y-%m-%d") ) )
 
-        for (id_lista_vez, ordem, cod_atendente, id_status, nome_atendente, desc_motivo, hora) in cur:
+        for (id_lista_vez, ordem, cod_atendente, id_status, nome_atendente, tipo_atendente, desc_motivo, hora) in cur:
             if (id_status == self.ID_STATUS_ATIVO):
                 key = self.TAG_DISPONIVEIS
             elif (id_status == self.ID_STATUS_EM_ATENDIMENTO):
@@ -172,11 +173,12 @@ class DatabaseFb():
             if key != "none":
                 result[key].append(dict(id_lista_vez = id_lista_vez,
                                         cod_atendente = cod_atendente,
-                                        nome_atendente = nome_atendente.title()[0:20],
+                                        nome_atendente = nome_atendente.title()[0:18],
+                                        tipo_atendente = tipo_atendente,
                                         ordem = ordem,
                                         id_status = id_status,
                                         desc_motivo = desc_motivo.title(),
-                                        hora = hora.strftime("%H:%M:%S") ) )
+                                        hora = hora.strftime("%H:%M") ) )
 
         cur.close()
 
