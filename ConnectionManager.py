@@ -17,5 +17,6 @@ class ConnectionManager:
     async def broadcast(self, message: dict):
         print("broadcast********")
         for connection in self.active_connections:
-            print("clients 8888888888888", message)
+            # print("clients 8888888888888", message)
+            print("send broadcast to ", connection.client.host)
             await connection.send_json(message)

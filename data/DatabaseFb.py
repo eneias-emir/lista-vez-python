@@ -14,6 +14,7 @@ select ID_LV, ORDEM_LV, COD_ATENDENTE_LV, ID_STATUS_LV, RE.NOME_RE, RE.TIPO_RE, 
     left join REPRESENTANTE RE on RE.COD_RE = LV.COD_ATENDENTE_LV
     left join LISTA_VEZ_MOTIVO LM on LM.ID_LM = LV.ID_MOTIVO_LV
     where DATA_LV = '%s'
+    and ID_STATUS_LV < 4
     order by ID_STATUS_LV, ORDEM_LV
 """
 
@@ -186,29 +187,36 @@ class DatabaseFb():
 
 
     def add_lista_vez(self, cod_atendente: int) -> dict:
-        id_lista_vez = self.get_new_generator('ID_LISTA_VEZ')
+        add_reg = False
+        # verifica se existe lista vez ativa para o atendente antes de inserir
+        id_lista_vez, id_status = self.get_id_lista_vez_atendente(cod_atendente)
+        if id_lista_vez == -1:
+            add_reg = True
+            id_lista_vez = self.get_new_generator('ID_LISTA_VEZ')
+
         id_status = self.ID_STATUS_ATIVO
 
         result = {'id_lista_vez': id_lista_vez, 'warning': '', 'error': ''}
 
-        cur = self.con.cursor()
-        try:
-            # Execute the insert statement
-            cur.execute(STM_INSERT_LISTA_VEZ % (id_lista_vez, cod_atendente) )
-            cur.execute(STM_INSERT_LISTA_VEZ_LOG_STATUS % (id_status, id_lista_vez) )
+        if add_reg:
+            cur = self.con.cursor()
+            try:
+                # Execute the insert statement
+                cur.execute(STM_INSERT_LISTA_VEZ % (id_lista_vez, cod_atendente) )
+                cur.execute(STM_INSERT_LISTA_VEZ_LOG_STATUS % (id_status, id_lista_vez) )
 
-            self.con.commit()
-        except Error as e:
-            # Rollback the transaction in case of an error
-            self.con.rollback()
+                self.con.commit()
+            except Error as e:
+                # Rollback the transaction in case of an error
+                self.con.rollback()
 
-            print("Error:", e)
-            mensagem = str(e)
-            result['error'] = f"error {mensagem}"
+                print("Error:", e)
+                mensagem = str(e)
+                result['error'] = f"error {mensagem}"
 
-        finally:
-            # Close the cursor and connection
-            cur.close()
+            finally:
+                # Close the cursor and connection
+                cur.close()
 
         return result
 
@@ -280,6 +288,7 @@ class DatabaseFb():
         cur.close()
 
         return id_lista_vez, id_status_atual
+    
     def lancar_prevenda(self, prevenda: Prevenda) -> dict:
         result = {"result": 0, "warnings": "", "error": ""}
 

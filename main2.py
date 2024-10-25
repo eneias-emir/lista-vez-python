@@ -30,42 +30,6 @@ app.add_middleware(
     allow_origins=["*"],
 )
 
-html = """
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Chat</title>
-    </head>
-    <body>
-        <h1>WebSocket Chat</h1>
-        <h2>Your ID: <span id="ws-id"></span></h2>
-        <form action="" onsubmit="sendMessage(event)">
-            <input type="text" id="messageText" autocomplete="off"/>
-            <button>Send</button>
-        </form>
-        <ul id='messages'>
-        </ul>
-        <script>
-            var client_id = Date.now()
-            document.querySelector("#ws-id").textContent = client_id;
-            var ws = new WebSocket(`ws://localhost:8000/ws/${client_id}`);
-            ws.onmessage = function(event) {
-                var messages = document.getElementById('messages')
-                var message = document.createElement('li')
-                var content = document.createTextNode(event.data)
-                message.appendChild(content)
-                messages.appendChild(message)
-            };
-            function sendMessage(event) {
-                var input = document.getElementById("messageText")
-                ws.send(input.value)
-                input.value = ''
-                event.preventDefault()
-            }
-        </script>
-    </body>
-</html>
-"""
 
 manager = ConnectionManager()
 db = DatabaseFb()
@@ -80,11 +44,9 @@ class ItemListaVez:
         self.nome_atendente = nome_atendente
 
 
-app.mount("/site", StaticFiles(directory="site"), name="site")
+# app.mount("/site", StaticFiles(directory="site"), name="site")
 
-#@app.get("/")
-#async def get():
-#    return HTMLResponse(html)
+
 @app.get('/')
 def get_app_angular():
 
@@ -137,8 +99,8 @@ async def websocket_endpoint(websocket: WebSocket):
             #await manager.send_personal_message(json.dumps('{"nome": "Eneias", "msg": "' + data + '"}'), websocket)
             #await manager.broadcast(json.dumps('{"nome": "Eneias", "msg": "'+data+'"}') )
             #logging.info('WS receive :', data)
-            print(' *********of type :', type(data))
-            print('data', data)
+            #print(' *********of type :', type(data))
+            #print('data', data)
 
             #data_ret = {}
             retorno_web_socket.clear()
@@ -198,3 +160,5 @@ async def websocket_endpoint(websocket: WebSocket):
         #await manager.broadcast(f"Client #{client_id} left the chat")
         retorno_web_socket.set_warning_message('WebSocket desconectado.')
         #await manager.broadcast(retorno_web_socket.get_resp_padrao() )
+
+

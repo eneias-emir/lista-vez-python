@@ -14,7 +14,7 @@ class RetornoWebSocket:
         self.lista_atendentes_ativos = lista
 
     def set_lista_vez(self, lista: dict) -> None:
-        print("set_lista_vez", lista)
+        # print("set_lista_vez", lista)
         self.lista_vez = lista
 
     def clear(self) -> None:
